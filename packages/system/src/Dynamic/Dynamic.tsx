@@ -11,13 +11,7 @@ import {
   splitProps,
   untrack,
 } from "solid-js";
-import {
-  getNextElement,
-  isServer,
-  spread,
-  ssrElement,
-  SVGElements,
-} from "solid-js/web";
+import * as web from 'solid-js/web';
 
 function createElement(
   tagName: string,
@@ -42,14 +36,14 @@ function ServerDynamic<T>(
   if (comp) {
     if (t === "function") return (comp as Function)(others);
     else if (t === "string") {
-      return ssrElement(comp as string, others, undefined, true);
+      return web.ssrElement(comp as string, others, undefined, true);
     }
   }
 }
 
 // https://github.com/solidjs/solid/blob/12c0dbbbf9f9fdf798c6682e57aee8ea763cf1ba/packages/solid/web/src/index.ts#L114
 export function Dynamic(props: any): Accessor<JSX.Element> {
-  if (isServer) return ServerDynamic(props);
+  if (web.isServer) return ServerDynamic(props);
   const [p, others] = splitProps(props, ["$component"]);
   const cached = createMemo<Function | string>(() => p.$component);
   return createMemo(() => {
@@ -60,11 +54,11 @@ export function Dynamic(props: any): Accessor<JSX.Element> {
         return untrack(() => component(others));
 
       case "string":
-        const isSvg = SVGElements.has(component);
+        const isSvg = web.SVGElements.has(component);
         const el = sharedConfig.context
-          ? getNextElement()
+          ? web.getNextElement()
           : createElement(component, isSvg);
-        spread(el, others, isSvg);
+        web.spread(el, others, isSvg);
         return el;
 
       default:
